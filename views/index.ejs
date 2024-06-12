@@ -1,11 +1,145 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
-</html>
+<%- include('partials/header') %>
+    <div class="container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2>Daftar Users</h2>
+            </div>
+            <div class="card-body">
+                <form id="form-user">
+                    <input type="hidden" id="id" value="">
+                    <div class="row mb-3">
+                        <label for="email" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="name">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Todos</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-content">
+
+                </tbody>
+            </table>
+            <div class="card-footer">
+                <button type="button" class="btn btn-danger" onclick="logout()">SignOut</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user?.token) {
+            window.location = '/login'
+        }
+
+        $(document).ready(function () {
+            loadUser()
+
+            $('#form-user').submit(function (e) {
+                e.preventDefault()
+                saveUser()
+            })
+
+            $('#table-content').on('click', '.btn-delete',function(){
+                const id = $(this).attr('iduser')
+                removeUser(id)
+            })
+        })
+
+        function loadUser() {
+            $.ajax({
+                method: "GET",
+                url: "/users",
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            }).done(function (data, textStatus, xhr) {
+                let html = ''
+                data.forEach((item, index) => {
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.email}</td>
+                            <td>${item.name}</td>
+                            <td>${item.todos.map(i => i.title)}</td>
+                            <td>
+                                <button type="button" class="btn btn-success" onclick='editUser(${JSON.stringify(item)})'>Edit</button>
+                                <button type="button" class="btn btn-danger btn-delete" iduser="${item._id}">Delete</button>
+                                <a href="/users/${item._id}/todos" class="btn btn-warning">Todos</a>
+                            </td>
+                        </tr>
+                    `
+                })
+                $('#table-content').html(html)
+            }).fail(function (xhr, textStatus) {
+                alert("Request failed: " + textStatus);
+            })
+        }
+
+        function saveUser() {
+            const id = $('#id').val()
+            const email = $('#email').val()
+            const name = $('#name').val()
+
+            let method = 'POST', url = '/users';
+
+            if (id) {
+                method = "PUT";
+                url = `/users/${id}`;
+            }
+            console.log(method, url, id, email, name)
+            $.ajax({
+                method,
+                url,
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                },
+                data: { email, name }
+            }).done(function (data, textStatus, xhr) {
+                    console.log(xhr.status)
+                    loadUser()
+                    $('#id').val('')
+                    $('#email').val('')
+                    $('#name').val('')
+            }).fail(function (xhr, textStatus) {
+                alert("Request failed: " + textStatus);
+            })
+        }
+
+        function removeUser(id) {
+            $.ajax({
+                method: 'DELETE',
+                url: `/users/${id}`,
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            }).done(function (data, textStatus, xhr) {
+                loadUser()
+            }).fail(function (xhr, textStatus) {
+                alert("Request failed: " + textStatus);
+            })
+        }
+
+        function editUser(user) {
+            $('#id').val(user._id)
+            $('#email').val(user.email)
+            $('#name').val(user.name)
+        }
+
+    </script>
+    <%- include('partials/footer') %>

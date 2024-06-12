@@ -1,0 +1,23 @@
+<script>
+    async function logout() {
+            $.ajax({
+                method: "POST",
+                url: "/users/signout",
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            }).done(function (data, textStatus, xhr) {
+                if (xhr.status !== 201) {
+                    alert(data.message)
+                } else {
+                    localStorage.clear()
+                    window.location = '/login'
+                }
+            }).fail(function (xhr, textStatus) {
+                alert("Request failed: " + textStatus);
+            })
+        }
+</script>
+</body>
+
+</html>

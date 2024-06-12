@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+    <div class="container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h1>Sign Up</h1>
+            </div>
+            <div class="card-body">
+                <form id="register-form">
+                    <div class="row mb-3">
+                        <label for="email" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="name">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="password" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="password">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p>have a account? please <a href="/login">sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function register() {
+            const email = $('#email').val()
+            const name = $('#name').val()
+            const password = $('#password').val()
+
+            $.ajax({
+                method: "POST",
+                url: "/users/signup",
+                data: { email, name, password }
+            }).done(function (data, textStatus, xhr) {
+                if (xhr.status !== 201) {
+                    alert(data.message)
+                } else {
+                    localStorage.setItem('user', JSON.stringify(data));
+                    window.location = '/';
+                }
+            }).fail(function (xhr, textStatus) {
+                alert("Request failed: " + textStatus);
+            })
+
+        }
+
+        $('#register-form').submit(function (e) {
+            e.preventDefault()
+            register()
+        })
+    </script>
+    <%- include('partials/footer') %>
