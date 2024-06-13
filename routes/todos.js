@@ -36,7 +36,7 @@ router.post('/', async function (req, res, next) {
     const todo = await Todo.create({ title, executor: user._id });
     user.todos.push(todo._id)
     await user.save()
-    res.json(todo)
+    res.status(201).json(todo)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -45,7 +45,7 @@ router.post('/', async function (req, res, next) {
 router.put('/:id', async function (req, res, next) {
   try {
     const todo = await Todo.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(todo)
+    res.status(201).json(todo)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
