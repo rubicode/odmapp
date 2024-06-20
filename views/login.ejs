@@ -40,7 +40,7 @@
                     alert(result.message)
                 } else {
                     localStorage.setItem('user', JSON.stringify(data));
-                    window.location = '/';
+                    window.location = '/chatting';
                 }
             }).fail(function (xhr, textStatus) {
                 alert("Request failed: " + textStatus);

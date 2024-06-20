@@ -1,8 +1,62 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+* {
+  box-sizing: border-box;
 }
 
-a {
-  color: #00B7FF;
+.box {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.btn {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  color: #fff;
+}
+
+.btn-primary {
+  background-color: blue;
+}
+
+.btn-success {
+  background-color: chartreuse;
+}
+
+.btn-danger {
+  background-color: red;
+}
+
+#chat-box {
+  display: flex;
+  margin: 20px;
+  padding: 10px;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#user-box {
+  width: calc(40% - 5px);
+}
+
+#message-box {
+  width: calc(60% - 5px);
+}
+
+#user-list li.active {
+  background-color: aqua;
+}
+
+#message-list {
+  display: flex;
+  flex-direction: column;
+}
+
+#message-list > .sender {
+  align-self: flex-end;
+}
+
+#message-list > .receiver {
+  align-self: flex-start;
 }

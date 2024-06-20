@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Coba React</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react?dev",
+                "react-dom/client": "https://esm.sh/react-dom/client?dev"
+            }
+        }
+    </script>
+    <script type="text/babel" data-type="module">
+
+        import React, { StrictMode, useState } from 'react';
+        import { createRoot } from 'react-dom/client';
+
+        function TodoItem({ no, todo, remove, update }) {
+            const [onEdit, setOnEdit] = useState(false)
+            const [title, setTitle] = useState(todo.title)
+
+            if (onEdit) {
+                return (
+                    <tr>
+                        <td>{no}</td>
+                        <td>
+                            <input
+                                className="form-control"
+                                type="text"
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                            />
+                        </td>
+                        <td>{todo.complete ? 'sudah' : 'belum'}</td>
+                        <td>
+                            <button className="btn btn-primary" type="button" onClick={() => {update(todo.id, title); setOnEdit(false)}}>save</button>
+                            <button className="btn btn-warning" type="button" onClick={() => setOnEdit(false)}>cancel</button>
+                        </td>
+                    </tr>
+                )
+            } else {
+                return (
+                    <tr>
+                        <td>{no}</td>
+                        <td>{todo.title}</td>
+                        <td>{todo.complete ? 'sudah' : 'belum'}</td>
+                        <td>
+                            <button className="btn btn-success" type="button" onClick={() => setOnEdit(true)}>Edit</button>
+                            <button className="btn btn-danger" type="button" onClick={() => remove(todo.id)}>Hapus</button>
+                        </td>
+                    </tr>
+                )
+            }
+
+
+        }
+
+        function TodoList({ data, removeTodo, updateTodo }) {
+            const nodeList = data.map((todo, index) => <TodoItem key={todo.id} no={index + 1} todo={todo} remove={removeTodo} update={updateTodo} />)
+
+            return (
+                <table className="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Title</th>
+                            <th>Complete</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {nodeList}
+                    </tbody>
+                </table>
+            )
+        }
+
+        function TodoForm({ add }) {
+            const [title, setTitle] = useState('')
+
+            const submit = (e) => {
+                e.preventDefault()
+                add(title)
+                setTitle('')
+            }
+
+            return (
+                <form onSubmit={submit}>
+                    <div className="row mb-3">
+                        <label htmlFor="title" className="col-sm-2 col-form-label">Title</label>
+                        <div className="col-sm-10">
+                            <input type="text" className="form-control" id="title" value={title} onChange={e => setTitle(e.target.value)} />
+                        </div>
+                    </div>
+                    <button className="btn btn-primary" type="submit">tambah</button>
+                </form>
+            )
+        }
+
+        function TodoBox() {
+            const [todos, setTodos] = useState([])
+
+            const addTodo = (title) => {
+                const id = Date.now()
+                setTodos([{ id, title, complete: false }, ...todos])
+            }
+
+            const removeTodo = (id) => {
+                setTodos(todos.filter(todo => todo.id !== id))
+            }
+
+            const updateTodo = (id, title) => {
+                setTodos(todos.map(todo => {
+                    if (todo.id === id) {
+                        todo.title = title
+                    }
+                    return todo
+                }))
+            }
+
+            return (
+                <div className="card">
+                    <div className="card-header text-center">
+                        <h1>Todo List</h1>
+                    </div>
+                    <div className="card-body">
+                        <TodoForm add={addTodo} />
+                    </div>
+                    <hr />
+                    <TodoList data={todos} removeTodo={removeTodo} updateTodo={updateTodo} />
+                </div>
+            )
+        }
+
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(
+            <StrictMode>
+                <TodoBox />
+            </StrictMode>
+        );
+    </script>
+</body>
+
+</html>

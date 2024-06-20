@@ -3,9 +3,10 @@ var router = express.Router();
 const mongoose = require('mongoose')
 const Todo = require('../models/Todo');
 const User = require('../models/User');
+const { tokenValid } = require('../helpers/util');
 
 /* GET todos listing. */
-router.get('/', async function (req, res, next) {
+router.get('/', tokenValid, async function (req, res, next) {
   try {
     const { executor, page = 1 } = req.query
     const limit = 30;
@@ -17,7 +18,7 @@ router.get('/', async function (req, res, next) {
     }
     const total = await Todo.countDocuments(params)
     const pages = Math.ceil(total / limit)
-    const todos = await Todo.find(params).limit(limit).skip(offset)
+    const todos = await Todo.find(params).sort({ _id: -1 }).limit(limit).skip(offset)
     res.json({
       todos,
       page: Number(page),
@@ -38,6 +39,7 @@ router.post('/', async function (req, res, next) {
     await user.save()
     res.status(201).json(todo)
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: error.message })
   }
 });

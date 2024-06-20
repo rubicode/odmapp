@@ -52,6 +52,7 @@ router.post('/signup', async function (req, res, next) {
     user.token = token;
     await user.save()
     res.status(201).json({
+      _id: user._id,
       email: user.email,
       name: user.name,
       token
@@ -72,6 +73,7 @@ router.post('/signin', async function (req, res, next) {
     user.token = token;
     await user.save()
     res.status(200).json({
+      _id: user._id,
       email: user.email,
       name: user.name,
       token

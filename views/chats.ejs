@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belajar AJAX and HTML DOM</title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+
+<body>
+    <div id="chat-box" class="box">
+        <div id="user-box" class="box">
+            <div id="user-list">
+            </div>
+            <button class="btn btn-danger" type="button" onclick="logout()">logout</button>
+        </div>
+        <div id="message-box" class="box">
+            <div id="message-list"></div>
+            <form id="add-form" autocomplete="off">
+                <input type="text" id="message">
+                <button type="submit">send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user?.token) {
+            window.location = '/login'
+        }
+
+        let receiver = ''
+        const socket = io();
+
+        socket.on('loadchat', function (data) {
+            console.log('ke trigger', user._id, data.receiver)
+            if(user._id === data.receiver){
+                getChats()
+            }
+        })
+
+        async function getUsers() {
+            const response = await fetch("/users", {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
+            const users = await response.json();
+
+            let html = '<ul>'
+
+            users.filter(item => item._id !== user._id).forEach(item => {
+                html += `
+                <li onclick="selectUser('${item._id}', this)">${item.name}</li>
+            `
+            });
+
+            html += '</ul>'
+
+            document.getElementById('user-list').innerHTML = html
+        }
+
+        getUsers()
+
+        function selectUser(r, element) {
+            receiver = r
+            document.querySelectorAll('#user-list li.active').forEach(function (item) { item.classList.remove('active') })
+            element.classList.add('active');
+            getChats()
+        }
+
+        async function getChats() {
+            const response = await fetch(`/chats?receiver=${receiver}`, {
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
+            });
+            const data = await response.json();
+
+            let html = ''
+
+            data.chats.forEach(item => {
+                html += `
+                <div class="${user._id === item.sender ? 'sender' : 'receiver'}">${item.message}</div>
+                `
+            });
+
+            document.getElementById('message-list').innerHTML = html
+        }
+
+        async function addChat() {
+            const message = document.getElementById('message').value
+            try {
+                const response = await fetch("/chats", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${user.token}`
+                    },
+                    body: JSON.stringify({ message, receiver }),
+                });
+
+                const result = await response.json();
+                console.log("Success:", result);
+                getChats()
+            } catch (error) {
+                console.error("Error:", error);
+            }
+
+        }
+
+        document.getElementById('add-form').addEventListener('submit', function (e) {
+            e.preventDefault()
+            addChat()
+            document.getElementById('message').value = ''
+            socket.emit('addchat', { sender: user._id, receiver: receiver })
+        })
+    </script>
+    <%- include('partials/footer') %>

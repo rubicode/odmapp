@@ -18,4 +18,12 @@ router.get('/users/:userid/todos', function (req, res, next) {
   res.render('todos', { userid: req.params.userid });
 });
 
+router.get('/chatting', function (req, res, next) {
+  res.render('chats');
+});
+
+router.get('/react', function (req, res, next) {
+  res.render('react');
+});
+
 module.exports = router;

@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('odmapp:server');
 var http = require('http');
+const { Server } = require('socket.io');
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +21,19 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+/**
+ * setup SOCKET IO
+*/
+const io = new Server(server);
+
+io.on('connection', (socket) => {
+  console.log('a user connected', socket.id);
+  socket.on('addchat', function ({ sender, receiver }) {
+    console.log('lagi addchat', sender, receiver)
+    socket.broadcast.emit('loadchat', { sender, receiver })
+  })
+});
 
 /**
  * Listen on provided port, on all network interfaces.
